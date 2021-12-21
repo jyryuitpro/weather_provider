@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:weather_provider/constants/constants.dart';
 import 'package:weather_provider/exceptions/weather_exception.dart';
