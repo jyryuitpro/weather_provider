@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:weather_provider/constants/constants.dart';
 import 'package:weather_provider/pages/search_page.dart';
 import 'package:weather_provider/providers/weather_provider.dart';
 import 'package:weather_provider/widgets/error_dialog.dart';
@@ -84,6 +85,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  String showTemperature(double temperature) {
+    return temperature.toStringAsFixed(2) + '℃';
+  }
+
+  Widget showIcon(String abbr) {
+    return FadeInImage.assetNetwork(
+      placeholder: 'assets/images/loading.gif',
+      image: 'https://$kHost/static/img/weather/png/64/$abbr.png',
+      width: 64,
+      height: 64,
+    );
+  }
+
   Widget _showWeather() {
     final weatherState = context.watch<WeatherProvider>().state;
 
@@ -112,11 +126,82 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return Center(
-      child: Text(
-        weatherState.weather.title,
-        style: TextStyle(fontSize: 18.0),
-      ),
+    return ListView(
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height / 6,
+        ),
+        Text(
+          weatherState.weather.title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 40.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+        Text(
+          TimeOfDay.fromDateTime(weatherState.weather.lastUpdated)
+              .format(context),
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 18.0),
+        ),
+        SizedBox(
+          height: 60.0,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              showTemperature(weatherState.weather.theTemp),
+              style: TextStyle(
+                fontSize: 30.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(
+              width: 20.0,
+            ),
+            Column(
+              children: [
+                Text(
+                  showTemperature(weatherState.weather.maxTemp),
+                  style: TextStyle(
+                    fontSize: 16.0,
+                  ),
+                ),
+                SizedBox(
+                  height: 10.0,
+                ),
+                Text(
+                  showTemperature(weatherState.weather.minTemp),
+                  style: TextStyle(
+                    fontSize: 16.0,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 40.0,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Spacer(),
+            showIcon(weatherState.weather.weatherStateAbbr),
+            SizedBox(width: 20.0,),
+            Text(
+              weatherState.weather.weatherStateName,
+              style: TextStyle(fontSize: 32.0),
+            ),
+            Spacer(),
+          ],
+        ),
+      ],
     );
   }
 }
