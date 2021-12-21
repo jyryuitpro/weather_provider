@@ -12,6 +12,35 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? _city;
+  late final WeatherProvider _weatherProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _weatherProvider = context.read<WeatherProvider>();
+    _weatherProvider.addListener(_registerListener);
+  }
+
+  void _registerListener() {
+    final WeatherState weatherState = context.read<WeatherProvider>().state;
+
+    if (weatherState.status == WeatherStatus.error) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(weatherState.error.errMsg),
+          );
+        },
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _weatherProvider.removeListener(_registerListener);
+    super.dispose();
+  }
 
   // @override
   // void initState() {
@@ -57,8 +86,42 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: Center(
-        child: Text('Home'),
+      body: _showWeather(),
+    );
+  }
+
+  Widget _showWeather() {
+    final weatherState = context.watch<WeatherProvider>().state;
+
+    if (weatherState.status == WeatherStatus.initial) {
+      return Center(
+        child: Text(
+          'Select a city',
+          style: TextStyle(fontSize: 20.0),
+        ),
+      );
+    }
+
+    if (weatherState.status == WeatherStatus.loading) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (weatherState.status == WeatherStatus.error &&
+        weatherState.weather.title == '') {
+      return Center(
+        child: Text(
+          'Select a city',
+          style: TextStyle(fontSize: 20.0),
+        ),
+      );
+    }
+
+    return Center(
+      child: Text(
+        weatherState.weather.title,
+        style: TextStyle(fontSize: 18.0),
       ),
     );
   }
